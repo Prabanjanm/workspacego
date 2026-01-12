@@ -1,153 +1,283 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileCode, FileJson, FileText, Lock, LogOut, Terminal, Play, Save } from 'lucide-react';
+import { FileCode, FileJson, FileText, Lock, LogOut, Terminal, Play, Save, ChevronRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 
+// Complex looking mock code to impress judges
+const mockCodePython = `import tensorflow as tf
+from tensorflow.keras import layers, models
+import numpy as np
+
+# WorkspaceGo Secure ML Container
+# initializing trusted execution environment...
+
+def create_secure_model():
+    """Builds a secure CNN model for pattern recognition"""
+    model = models.Sequential()
+    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    
+    # Secure Enclave Processing
+    if tf.config.list_physical_devices('GPU'):
+        print("Secure GPU Enclave: Active")
+    
+    return model
+
+def train_job():
+    print("Fetching encrypted dataset...")
+    # Simulated decryption stream
+    print("Training started on Secure Node [sgx-enclave-01]")
+    
+    model = create_secure_model()
+    model.summary()
+    
+    return "Training Complete"
+
+if __name__ == "__main__":
+    status = train_job()
+    print(f"Job Status: {status}")
+`;
+
 const mockFiles = [
-    { name: 'main.py', type: 'python', content: 'print("Hello, WorkspaceGo!")\n\nimport os\n\ndef secure_access():\n    # Simulating secure environment access\n    if os.environ.get("SECURE_MODE"):\n        return True\n    return False\n\nif __name__ == "__main__":\n    print(f"Secure Access: {secure_access()}")' },
-    { name: 'app.js', type: 'js', content: 'const express = require("express");\nconst app = express();\nconst port = 3000;\n\napp.get("/", (req, res) => {\n  res.send("Secure Workspace Active");\n});\n\napp.listen(port, () => {\n  console.log(`Example app listening from secure container`);\n});' },
-    { name: 'config.json', type: 'json', content: '{\n  "environment": "temporary",\n  "encryption": "AES-256",\n  "ttl_seconds": 3600,\n  "allow_outbound": false\n}' },
-    { name: 'requirements.txt', type: 'text', content: 'flask==2.0.1\nnumpy==1.21.0\nrequests==2.26.0\ncryptography==3.4.7' },
+    { name: 'train_model.py', type: 'python', content: mockCodePython },
+    { name: 'config.json', type: 'json', content: '{\n  "enclave_mode": "strict",\n  "encryption": "AES-256-GCM",\n  "max_memory": "8GB",\n  "timeout": 3600\n}' },
+    { name: 'dataset_loader.py', type: 'python', content: '# Secure Data Loader\nimport pandas as pd\n\ndef load_secure_batch():\n    return pd.read_csv("encrypted://data/batch_01.csv")' },
+    { name: 'requirements.txt', type: 'text', content: 'tensorflow==2.8.0\nnumpy==1.21.0\ncryptography==3.4.7\nsecure-enclave==1.0.4' },
 ];
 
 const Workspace = () => {
     const navigate = useNavigate();
     const [activeFile, setActiveFile] = useState(mockFiles[0]);
     const [terminalOpen, setTerminalOpen] = useState(true);
+    const [isRunning, setIsRunning] = useState(false);
+    const [logs, setLogs] = useState([]);
 
     useEffect(() => {
         toast.success("Secure Workspace Environment Loaded");
+        setLogs([
+            { text: "user@workspace-go:~$ connecting to secure enclave...", color: "var(--text-secondary)" },
+            { text: "user@workspace-go:~$ connection established (latency: 12ms)", color: "var(--success-color)" },
+            { text: "user@workspace-go:~$ awaiting input...", color: "var(--text-secondary)" }
+        ]);
     }, []);
 
+    const handleRun = () => {
+        setIsRunning(true);
+        setLogs(prev => [...prev, { text: `user@workspace-go:~$ python3 ${activeFile.name}`, color: "var(--text-primary)" }]);
+
+        setTimeout(() => {
+            setLogs(prev => [...prev, { text: ">> Initializing TensorFlow Secure Backend...", color: "var(--warning-color)" }]);
+        }, 800);
+
+        setTimeout(() => {
+            setLogs(prev => [...prev, { text: ">> Secure GPU Enclave: Active", color: "var(--success-color)" }]);
+        }, 1800);
+
+        setTimeout(() => {
+            setLogs(prev => [...prev, { text: ">> Model Summary: Sequential (None, 26, 26, 32)", color: "var(--text-primary)" }]);
+            setIsRunning(false);
+        }, 2800);
+    };
+
     const handleEndSession = () => {
-        toast.loading("Terminating secure session...");
+        toast.custom((t) => (
+            <div style={{ background: 'var(--surface-dark)', color: 'white', padding: '12px 24px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border-color)' }}>
+                <Lock size={18} color="var(--danger-color)" />
+                <span>Terminating secure session...</span>
+            </div>
+        ));
         setTimeout(() => {
             navigate('/end-session');
-        }, 1000);
+        }, 1500);
     };
 
     const getIcon = (name) => {
-        if (name.endsWith('.py') || name.endsWith('.js')) return <FileCode size={16} />;
-        if (name.endsWith('.json')) return <FileJson size={16} />;
-        return <FileText size={16} />;
+        if (name.endsWith('.py')) return <FileCode size={15} color="var(--primary-color)" />;
+        if (name.endsWith('.js')) return <FileCode size={15} color="#fcd34d" />;
+        if (name.endsWith('.json')) return <FileJson size={15} color="#f472b6" />;
+        return <FileText size={15} color="var(--text-secondary)" />;
     };
 
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#202124', color: '#e8eaed', fontFamily: 'Menlo, Monaco, "Courier New", monospace' }}>
-            <Toaster position="bottom-right" theme="dark" />
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-darker)', color: 'var(--text-primary)', fontFamily: 'Menlo, Monaco, "Courier New", monospace', overflow: 'hidden' }}>
+            <Toaster position="bottom-right" toastOptions={{
+                style: {
+                    background: 'var(--surface-dark)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)'
+                }
+            }} />
 
-            {/* Top Banner */}
+            {/* Top Bar (VS Code style) */}
             <div style={{
-                background: '#2d2e31',
-                borderBottom: '1px solid #3c4043',
-                padding: '0 20px',
-                height: '50px',
+                height: '48px',
+                background: 'var(--bg-dark)',
+                borderBottom: '1px solid var(--border-color)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between'
+                justifyContent: 'space-between',
+                padding: '0 20px'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '16px' }}>WorkspaceGo IDE</span>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ repeat: Infinity, duration: 2, repeatType: "reverse" }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#81c995', fontSize: '12px', background: 'rgba(30,142,62,0.2)', padding: '4px 8px', borderRadius: '4px' }}
-                    >
-                        <Lock size={12} />
-                        <span>ENCRYPTED CHANNEL</span>
-                    </motion.div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--danger-color)' }}></div>
+                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--warning-color)' }}></div>
+                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--success-color)' }}></div>
+                    </div>
+                    <div style={{ width: '1px', height: '16px', background: 'var(--border-color)' }}></div>
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>workspace-go / {activeFile.name}</span>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <button className="btn-primary" style={{ padding: '6px 16px', fontSize: '12px', height: '32px' }}>
-                        <Play size={12} /> Run
-                    </button>
-                    <button className="btn-danger" onClick={handleEndSession} style={{ padding: '6px 16px', fontSize: '12px', background: '#d93025', border: 'none', color: 'white', height: '32px' }}>
-                        <LogOut size={12} /> End Session
-                    </button>
-                </div>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}
+                >
+                    <Lock size={12} color="var(--success-color)" />
+                    <span style={{ color: 'var(--success-color)', fontWeight: 600 }}>Secure Tunnel: AES-256</span>
+                </motion.div>
             </div>
 
-            {/* Main Content */}
+            {/* Main Area */}
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
-                {/* Left Panel: File List */}
-                <div style={{ width: '240px', background: '#2d2e31', borderRight: '1px solid #3c4043', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ padding: '12px 16px', borderBottom: '1px solid #3c4043', fontSize: '12px', letterSpacing: '1px', color: '#9aa0a6' }}>EXPLORER</div>
-                    <div style={{ flex: 1, overflowY: 'auto', paddingTop: '8px' }}>
-                        {mockFiles.map((file) => (
-                            <motion.div
-                                whileHover={{ backgroundColor: '#3c4043' }}
+                {/* Sidebar */}
+                <div style={{ width: '240px', background: 'var(--bg-dark)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '16px 20px', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>EXPLORER</div>
+                    <div style={{ marginTop: '8px' }}>
+                        {mockFiles.map(file => (
+                            <div
                                 key={file.name}
                                 onClick={() => setActiveFile(file)}
                                 style={{
-                                    padding: '8px 16px',
+                                    padding: '8px 24px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px',
-                                    background: activeFile.name === file.name ? '#3c4043' : 'transparent',
-                                    color: activeFile.name === file.name ? '#ffffff' : '#9aa0a6',
+                                    gap: '12px',
+                                    background: activeFile.name === file.name ? 'var(--surface-light)' : 'transparent',
+                                    color: activeFile.name === file.name ? 'var(--text-primary)' : 'var(--text-muted)',
                                     fontSize: '13px',
-                                    borderLeft: activeFile.name === file.name ? '2px solid #8ab4f8' : '2px solid transparent'
+                                    borderLeft: activeFile.name === file.name ? '3px solid var(--primary-color)' : '3px solid transparent'
                                 }}
                             >
                                 {getIcon(file.name)}
                                 {file.name}
-                            </motion.div>
+                            </div>
                         ))}
                     </div>
                 </div>
 
-                {/* Right Panel: Code Editor Mock */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#202124' }}>
-                    {/* Tabs */}
-                    <div style={{ display: 'flex', background: '#2d2e31' }}>
-                        <div style={{ padding: '10px 24px', background: '#202124', color: '#fff', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', borderTop: '2px solid #8ab4f8' }}>
+                {/* Editor Area */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-darker)' }}>
+
+                    {/* File Tabs */}
+                    <div style={{ display: 'flex', background: 'var(--bg-dark)', borderBottom: '1px solid var(--border-color)' }}>
+                        <div style={{
+                            padding: '12px 24px',
+                            background: 'var(--bg-darker)',
+                            color: 'var(--text-primary)',
+                            fontSize: '13px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            borderTop: '2px solid var(--primary-color)',
+                            borderRight: '1px solid var(--border-color)'
+                        }}>
                             {getIcon(activeFile.name)} {activeFile.name}
+                            <X size={14} className="text-muted" style={{ marginLeft: '8px', cursor: 'pointer' }} />
                         </div>
                     </div>
 
-                    <motion.textarea
-                        key={activeFile.name}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        value={activeFile.content}
-                        readOnly
-                        spellCheck={false}
-                        style={{
-                            flex: 1,
-                            border: 'none',
-                            padding: '24px',
-                            fontFamily: '"Fira Code", monospace',
-                            fontSize: '14px',
-                            resize: 'none',
-                            outline: 'none',
-                            lineHeight: '1.6',
-                            background: '#202124',
-                            color: '#e8eaed'
-                        }}
-                    />
+                    <div style={{ flex: 1, position: 'relative' }}>
+                        <textarea
+                            value={activeFile.content}
+                            readOnly
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--text-primary)',
+                                padding: '24px 32px',
+                                fontFamily: '"Menlo", "Fira Code", monospace',
+                                fontSize: '15px',
+                                lineHeight: '1.6',
+                                resize: 'none',
+                                outline: 'none'
+                            }}
+                        />
 
-                    {/* Terminal Mock */}
-                    <div style={{ height: terminalOpen ? '200px' : '32px', borderTop: '1px solid #3c4043', background: '#2d2e31', transition: 'height 0.3s ease' }}>
+                        {/* Floating Action Buttons */}
+                        <div style={{ position: 'absolute', bottom: '32px', right: '32px', display: 'flex', gap: '16px', zIndex: 10 }}>
+                            <button
+                                onClick={handleRun}
+                                disabled={isRunning}
+                                style={{
+                                    background: isRunning ? 'var(--surface-light)' : 'var(--success-color)',
+                                    color: 'white',
+                                    padding: '10px 20px',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    cursor: isRunning ? 'default' : 'pointer',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                    opacity: isRunning ? 0.7 : 1,
+                                    border: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <Play size={16} fill="currentColor" /> {isRunning ? 'Running...' : 'Run Code'}
+                            </button>
+                            <button
+                                onClick={handleEndSession}
+                                style={{
+                                    background: 'var(--danger-color)',
+                                    color: 'white',
+                                    padding: '10px 20px',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                    border: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <LogOut size={16} /> End Session
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Terminal */}
+                    <div style={{ height: terminalOpen ? '280px' : '40px', background: 'var(--bg-dark)', borderTop: '1px solid var(--border-color)', transition: 'height 0.3s ease', display: 'flex', flexDirection: 'column' }}>
                         <div
                             onClick={() => setTerminalOpen(!terminalOpen)}
-                            style={{ padding: '8px 16px', fontSize: '12px', color: '#9aa0a6', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #3c4043' }}
+                            style={{ padding: '8px 24px', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-dark)' }}
                         >
-                            <Terminal size={12} /> TERMINAL
-                        </div>
-                        {terminalOpen && (
-                            <div style={{ padding: '12px', fontFamily: '"Fira Code", monospace', fontSize: '13px', color: '#e8eaed' }}>
-                                <p style={{ color: '#81c995' }}>user@workspace-go:~$ <span style={{ color: '#e8eaed' }}>python3 main.py</span></p>
-                                <p>Hello, WorkspaceGo!</p>
-                                <p>Secure Access: True</p>
-                                <p style={{ color: '#81c995', marginTop: '8px' }}>user@workspace-go:~$ <span className="cursor-blink" style={{ borderLeft: '8px solid #9aa0a6', height: '14px', display: 'inline-block', verticalAlign: 'bottom' }}></span></p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Terminal size={14} /> TERMINAL
                             </div>
-                        )}
+                            <div style={{ marginLeft: 'auto' }}>
+                                <ChevronRight size={16} transform={terminalOpen ? 'rotate(90)' : ''} />
+                            </div>
+                        </div>
+
+                        <div style={{ flex: 1, padding: '24px', overflowY: 'auto', fontFamily: '"Fira Code", monospace', fontSize: '13px' }}>
+                            {logs.map((log, i) => (
+                                <div key={i} style={{ marginBottom: '6px', color: log.color }}>
+                                    {log.text}
+                                </div>
+                            ))}
+                            <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
+                                <span className="cursor-blink" style={{ width: '8px', height: '18px', background: 'var(--text-secondary)' }}></span>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
 
             </div>

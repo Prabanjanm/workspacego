@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, CloudOff, UserCheck, HardDrive, ArrowRight, Zap } from 'lucide-react';
+import { Shield, Cloud, Terminal, Clock, Settings, Bell, Search, Menu, LogOut, ChevronDown, Cpu, Activity, Folder } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Dashboard = () => {
@@ -11,131 +11,215 @@ const Dashboard = () => {
         setAccessing(true);
         setTimeout(() => {
             navigate('/workspace');
-        }, 800);
+        }, 1200);
     };
 
-    const container = {
-        hidden: { opacity: 0 },
-        show: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
-    };
-
-    const item = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 }
+    const StatusBadge = ({ status }) => {
+        const isReady = status === 'Ready';
+        return (
+            <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: 600,
+                background: isReady ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                color: isReady ? 'var(--success-color)' : 'var(--danger-color)',
+                border: `1px solid ${isReady ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+            }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor', marginRight: '8px', boxShadow: isReady ? '0 0 8px var(--success-color)' : 'none' }}></span>
+                {status}
+            </div>
+        );
     };
 
     return (
-        <div className="container" style={{ padding: '40px 20px', minHeight: '100vh', background: 'var(--background-color)' }}>
-            <motion.header
-                initial={{ y: -50, opacity: 0 }}
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-dark)' }}>
+            {/* Glass Navbar */}
+            <motion.nav
+                initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}
+                style={{
+                    height: '70px',
+                    background: 'var(--bg-darker)',
+                    borderBottom: '1px solid var(--border-color)',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 50
+                }}
             >
-                <div>
-                    <h2 style={{ fontSize: '24px', background: '-webkit-linear-gradient(45deg, #1a73e8, #4285f4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Student Dashboard</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Welcome back, ready to code?</p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'white', padding: '8px 16px', borderRadius: '30px', boxShadow: 'var(--shadow-sm)' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(45deg, #1a73e8, #a4c2f4)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold' }}>S</div>
-                    <span style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: '500' }}>student@university.edu</span>
-                </div>
-            </motion.header>
-
-            <motion.div
-                variants={container}
-                initial="hidden"
-                animate="show"
-                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}
-            >
-
-                {/* Workspace Status Card */}
-                <motion.div variants={item} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, right: 0, padding: '8px 12px', background: '#e8daff', borderBottomLeftRadius: '12px', color: '#6200ee', fontSize: '12px', fontWeight: 'bold' }}>
-                        BETA ACCESS
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                        <div style={{ padding: '10px', background: '#e8f0fe', borderRadius: '8px' }}>
-                            <HardDrive size={24} color="var(--primary-color)" />
+                <div className="container" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <Cpu size={28} className="text-gradient" />
+                            <h2 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px' }} className="text-gradient">
+                                WorkspaceGo
+                            </h2>
                         </div>
-                        <div>
-                            <h3 style={{ fontSize: '18px' }}>Remote Workspace</h3>
-                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Ubuntu 22.04 LTS • 8GB RAM</p>
+                        <div style={{ display: 'none', md: { display: 'flex' }, gap: '32px', fontSize: '14px', fontWeight: 500 }}>
+                            <span style={{ color: 'var(--text-primary)', borderBottom: '2px solid var(--primary-color)', paddingBottom: '21px', cursor: 'pointer' }}>Dashboard</span>
+                            <span style={{ color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.8 }}>Environments</span>
+                            <span style={{ color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.8 }}>Activity</span>
                         </div>
                     </div>
 
-                    <div style={{ marginBottom: '32px', display: 'flex', gap: '24px' }}>
-                        <div>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#fbbc04' }}></span>
-                                <span style={{ fontWeight: '500' }}>Idle</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                        <div style={{ position: 'relative', cursor: 'pointer' }}>
+                            <Bell size={20} color="var(--text-secondary)" />
+                            <span style={{ position: 'absolute', top: -2, right: 0, width: '8px', height: '8px', background: 'var(--danger-color)', borderRadius: '50%', border: '2px solid var(--bg-dark)' }}></span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '6px 12px', background: 'var(--surface-light)', borderRadius: '30px', border: '1px solid var(--border-color)' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: '12px' }}>
+                                S
                             </div>
-                        </div>
-                        <div>
-                            <p style={{ color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Last Snapshot</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                                <Zap size={14} color="#fbbc04" fill="#fbbc04" />
-                                <span style={{ fontWeight: '500' }}>Just now</span>
-                            </div>
+                            <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>Student</span>
+                            <ChevronDown size={14} color="var(--text-secondary)" />
                         </div>
                     </div>
+                </div>
+            </motion.nav>
 
-                    <motion.button
-                        whileHover={{ scale: 1.02, x: 5 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="btn-primary"
-                        onClick={handleAccess}
-                        style={{ width: '100%', justifyContent: 'space-between', padding: '16px 24px' }}
+            {/* Dashboard Content */}
+            <main className="container" style={{ padding: '40px 24px', flex: 1 }}>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    style={{ marginBottom: '40px' }}
+                >
+                    <h1 style={{ fontSize: '32px', marginBottom: '8px' }}>Launchpad</h1>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>Manage your high-performance containerized environments.</p>
+                </motion.div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '32px' }}>
+
+                    {/* Environment Card */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="glass-card card-hover"
+                        style={{ padding: '0', height: '100%', display: 'flex', flexDirection: 'column' }}
                     >
-                        <span>{accessing ? 'Initializing Environment...' : 'Access Workspace'}</span>
-                        {!accessing && <ArrowRight size={20} />}
-                    </motion.button>
-                </motion.div>
+                        <div style={{ padding: '32px', background: 'linear-gradient(180deg, rgba(99, 102, 241, 0.12), transparent)', borderBottom: '1px solid var(--border-color)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '24px' }}>
+                                <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--surface-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                    <Terminal size={28} color="var(--primary-color)" />
+                                </div>
+                                <StatusBadge status="Ready" />
+                            </div>
+                            <h3 style={{ fontSize: '22px', marginBottom: '8px' }}>Python ML Suite</h3>
+                            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>PyTorch, TensorFlow, CUDA 11.8 • NVIDIA T4</p>
+                        </div>
 
-                {/* Security Assurance Card */}
-                <motion.div variants={item} className="card" style={{ borderLeft: '4px solid var(--success-color)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                        <div style={{ padding: '10px', background: '#e6f4ea', borderRadius: '8px' }}>
-                            <Shield size={24} color="var(--success-color)" />
+                        <div style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '12px', color: 'var(--text-muted)' }}>
+                                    <span>Session Quota</span>
+                                    <span style={{ color: 'var(--text-primary)' }}>1h remaining</span>
+                                </div>
+                                <div style={{ width: '100%', height: '8px', background: 'var(--surface-light)', borderRadius: '4px', marginBottom: '32px', overflow: 'hidden' }}>
+                                    <div style={{ width: '85%', height: '100%', background: 'linear-gradient(90deg, var(--primary-color), var(--secondary-color))', borderRadius: '4px' }}></div>
+                                </div>
+                            </div>
+
+                            <button
+                                className="btn-primary"
+                                style={{ width: '100%', padding: '16px' }}
+                                onClick={handleAccess}
+                            >
+                                {accessing ? (
+                                    <>
+                                        <motion.div
+                                            animate={{ rotate: 360 }}
+                                            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                                            style={{ width: '18px', height: '18px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }}
+                                        />
+                                        Provisioning...
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Launch Workspace</span>
+                                        <ChevronDown style={{ transform: 'rotate(-90deg)' }} size={16} />
+                                    </>
+                                )}
+                            </button>
                         </div>
-                        <div>
-                            <h3 style={{ fontSize: '18px' }}>Security Protocol</h3>
-                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Zero-trust architecture enabled</p>
-                        </div>
+                    </motion.div>
+
+                    {/* Stats & Quick Actions Grid */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                        {/* Security Card */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="glass-card card-hover"
+                            style={{ padding: '24px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                        >
+                            <div>
+                                <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Security Audit</h4>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success-color)', boxShadow: '0 0 8px var(--success-color)' }}></div>
+                                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Monitoring Active</p>
+                                </div>
+                            </div>
+                            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                                <Shield size={28} color="var(--success-color)" />
+                            </div>
+                        </motion.div>
+
+                        {/* Recent Files Card */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="glass-card"
+                            style={{ padding: '32px', flex: 1 }}
+                        >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                                <h4 style={{ fontSize: '18px' }}>Cloud Sync</h4>
+                                <Cloud size={20} color="var(--text-muted)" />
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {[
+                                    { name: 'neural_network.py', size: '12kb', icon: <Terminal size={18} /> },
+                                    { name: 'dataset_v2.csv', size: '4.2mb', icon: <Activity size={18} /> },
+                                    { name: 'requirements.txt', size: '1kb', icon: <Folder size={18} /> }
+                                ].map((file, i) => (
+                                    <motion.div
+                                        whileHover={{ x: 4, backgroundColor: 'rgba(255,255,255,0.03)' }}
+                                        key={file.name}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '16px',
+                                            padding: '12px',
+                                            borderRadius: '12px',
+                                            border: '1px solid var(--border-color)',
+                                            background: 'var(--bg-darker)',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <div style={{ color: 'var(--primary-color)' }}>{file.icon}</div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: '14px', marginBottom: '2px' }}>{file.name}</div>
+                                            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{file.size}</div>
+                                        </div>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success-color)' }} title="Synced"></div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </motion.div>
+
                     </div>
-
-                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                        <motion.li
-                            whileHover={{ x: 5 }}
-                            style={{ background: 'rgba(255,255,255,0.5)', padding: '12px', borderRadius: '8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', border: '1px solid #f0f0f0' }}
-                        >
-                            <CloudOff size={18} color="#5f6368" />
-                            <span>No permanent cloud persistence</span>
-                        </motion.li>
-                        <motion.li
-                            whileHover={{ x: 5 }}
-                            style={{ background: 'rgba(255,255,255,0.5)', padding: '12px', borderRadius: '8px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', border: '1px solid #f0f0f0' }}
-                        >
-                            <Shield size={18} color="#5f6368" />
-                            <span>Auto-wipe on session end</span>
-                        </motion.li>
-                        <motion.li
-                            whileHover={{ x: 5 }}
-                            style={{ background: 'rgba(255,255,255,0.5)', padding: '12px', borderRadius: '8px', marginBottom: '0', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '14px', border: '1px solid #f0f0f0' }}
-                        >
-                            <UserCheck size={18} color="#5f6368" />
-                            <span>Biometric verification active</span>
-                        </motion.li>
-                    </ul>
-                </motion.div>
-
-            </motion.div>
+                </div>
+            </main>
         </div>
     );
 };
