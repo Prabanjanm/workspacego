@@ -81,7 +81,21 @@ const Login = ({ onLogin }) => {
         </motion.button>
 
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-muted)' }}>
+          <div
+            onClick={() => toast.success("Encryption Verified: AES-256-GCM", {
+              style: {
+                background: 'var(--surface-dark)',
+                color: 'var(--success-color)',
+                border: '1px solid var(--border-color)'
+              },
+              iconTheme: {
+                primary: 'var(--success-color)',
+                secondary: 'var(--bg-dark)'
+              }
+            })}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-muted)', cursor: 'pointer', transition: 'color 0.2s' }}
+            className="hover:text-success"
+          >
             <ShieldCheck size={14} color="var(--success-color)" />
             <span>End-to-end encrypted session</span>
           </div>

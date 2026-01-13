@@ -6,6 +6,9 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Workspace from './pages/Workspace';
 import EndSession from './pages/EndSession';
+import Environments from './pages/Environments';
+import Activity from './pages/Activity';
+import Profile from './pages/Profile';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -50,6 +53,33 @@ function App() {
             element={
               <ProtectedRoute>
                 <Workspace />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/environments"
+            element={
+              <ProtectedRoute>
+                <Environments />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/activity"
+            element={
+              <ProtectedRoute>
+                <Activity />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

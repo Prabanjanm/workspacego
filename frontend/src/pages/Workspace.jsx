@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileCode, FileJson, FileText, Lock, LogOut, Terminal, Play, Save, ChevronRight, X } from 'lucide-react';
+import { FileCode, FileJson, FileText, Lock, LogOut, Terminal, Play, Save, ChevronRight, X, Menu, Folder } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -53,6 +53,7 @@ const Workspace = () => {
     const [terminalOpen, setTerminalOpen] = useState(true);
     const [isRunning, setIsRunning] = useState(false);
     const [logs, setLogs] = useState([]);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
     useEffect(() => {
         toast.success("Secure Workspace Environment Loaded");
@@ -61,22 +62,29 @@ const Workspace = () => {
             { text: "user@workspace-go:~$ connection established (latency: 12ms)", color: "var(--success-color)" },
             { text: "user@workspace-go:~$ awaiting input...", color: "var(--text-secondary)" }
         ]);
+
+        // Auto-close sidebar on mobile initial load
+        if (window.innerWidth < 768) setSidebarOpen(false);
     }, []);
+
+    const addLog = (text, color) => {
+        setLogs(prev => [...prev, { text, color, id: Date.now() }]);
+    };
 
     const handleRun = () => {
         setIsRunning(true);
-        setLogs(prev => [...prev, { text: `user@workspace-go:~$ python3 ${activeFile.name}`, color: "var(--text-primary)" }]);
+        addLog(`user@workspace-go:~$ python3 ${activeFile.name}`, "var(--text-primary)");
 
         setTimeout(() => {
-            setLogs(prev => [...prev, { text: ">> Initializing TensorFlow Secure Backend...", color: "var(--warning-color)" }]);
+            addLog(">> Initializing TensorFlow Secure Backend...", "var(--warning-color)");
         }, 800);
 
         setTimeout(() => {
-            setLogs(prev => [...prev, { text: ">> Secure GPU Enclave: Active", color: "var(--success-color)" }]);
+            addLog(">> Secure GPU Enclave: Active", "var(--success-color)");
         }, 1800);
 
         setTimeout(() => {
-            setLogs(prev => [...prev, { text: ">> Model Summary: Sequential (None, 26, 26, 32)", color: "var(--text-primary)" }]);
+            addLog(">> Model Summary: Sequential (None, 26, 26, 32)", "var(--text-primary)");
             setIsRunning(false);
         }, 2800);
     };
@@ -100,6 +108,27 @@ const Workspace = () => {
         return <FileText size={15} color="var(--text-secondary)" />;
     };
 
+    const handleSave = () => {
+        toast.success("File saved successfully", {
+            style: {
+                background: 'var(--surface-dark)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-color)'
+            }
+        });
+    };
+
+    const handleCloseTab = (e) => {
+        e.stopPropagation();
+        toast.error("Cannot close main entry point", {
+            style: {
+                background: 'var(--surface-dark)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-color)'
+            }
+        });
+    };
+
     return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-darker)', color: 'var(--text-primary)', fontFamily: 'Menlo, Monaco, "Courier New", monospace', overflow: 'hidden' }}>
             <Toaster position="bottom-right" toastOptions={{
@@ -118,15 +147,23 @@ const Workspace = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0 20px'
+                padding: '0 16px'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div
+                        className="hide-on-desktop"
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        style={{ cursor: 'pointer', padding: '4px' }}
+                    >
+                        <Menu size={18} color="var(--text-secondary)" />
+                    </div>
+
+                    <div className="hide-on-mobile" style={{ display: 'flex', gap: '8px' }}>
                         <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--danger-color)' }}></div>
                         <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--warning-color)' }}></div>
                         <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--success-color)' }}></div>
                     </div>
-                    <div style={{ width: '1px', height: '16px', background: 'var(--border-color)' }}></div>
+                    <div className="hide-on-mobile" style={{ width: '1px', height: '16px', background: 'var(--border-color)' }}></div>
                     <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>workspace-go / {activeFile.name}</span>
                 </div>
 
@@ -141,40 +178,70 @@ const Workspace = () => {
             </div>
 
             {/* Main Area */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
                 {/* Sidebar */}
-                <div style={{ width: '240px', background: 'var(--bg-dark)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ padding: '16px 20px', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>EXPLORER</div>
-                    <div style={{ marginTop: '8px' }}>
-                        {mockFiles.map(file => (
-                            <div
-                                key={file.name}
-                                onClick={() => setActiveFile(file)}
-                                style={{
-                                    padding: '8px 24px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px',
-                                    background: activeFile.name === file.name ? 'var(--surface-light)' : 'transparent',
-                                    color: activeFile.name === file.name ? 'var(--text-primary)' : 'var(--text-muted)',
-                                    fontSize: '13px',
-                                    borderLeft: activeFile.name === file.name ? '3px solid var(--primary-color)' : '3px solid transparent'
-                                }}
-                            >
-                                {getIcon(file.name)}
-                                {file.name}
+                <AnimatePresence>
+                    {sidebarOpen && (
+                        <motion.div
+                            initial={{ x: -240, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -240, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            style={{
+                                width: '240px',
+                                background: 'var(--bg-dark)',
+                                borderRight: '1px solid var(--border-color)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                position: window.innerWidth < 768 ? 'absolute' : 'relative',
+                                height: '100%',
+                                zIndex: 20
+                            }}
+                        >
+                            <div style={{ padding: '16px 20px', fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>EXPLORER</div>
+                            <div style={{ marginTop: '8px' }}>
+                                {mockFiles.map(file => (
+                                    <div
+                                        key={file.name}
+                                        onClick={() => {
+                                            setActiveFile(file);
+                                            if (window.innerWidth < 768) setSidebarOpen(false);
+                                        }}
+                                        style={{
+                                            padding: '8px 24px',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            background: activeFile.name === file.name ? 'var(--surface-light)' : 'transparent',
+                                            color: activeFile.name === file.name ? 'var(--text-primary)' : 'var(--text-muted)',
+                                            fontSize: '13px',
+                                            borderLeft: activeFile.name === file.name ? '3px solid var(--primary-color)' : '3px solid transparent'
+                                        }}
+                                    >
+                                        {getIcon(file.name)}
+                                        {file.name}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Mobile Overlay */}
+                {sidebarOpen && window.innerWidth < 768 && (
+                    <div
+                        onClick={() => setSidebarOpen(false)}
+                        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 15 }}
+                    ></div>
+                )}
 
                 {/* Editor Area */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-darker)' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-darker)', minWidth: 0 }}>
 
                     {/* File Tabs */}
-                    <div style={{ display: 'flex', background: 'var(--bg-dark)', borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', background: 'var(--bg-dark)', borderBottom: '1px solid var(--border-color)', overflowX: 'auto' }}>
                         <div style={{
                             padding: '12px 24px',
                             background: 'var(--bg-darker)',
@@ -184,10 +251,11 @@ const Workspace = () => {
                             alignItems: 'center',
                             gap: '10px',
                             borderTop: '2px solid var(--primary-color)',
-                            borderRight: '1px solid var(--border-color)'
+                            borderRight: '1px solid var(--border-color)',
+                            whiteSpace: 'nowrap'
                         }}>
                             {getIcon(activeFile.name)} {activeFile.name}
-                            <X size={14} className="text-muted" style={{ marginLeft: '8px', cursor: 'pointer' }} />
+                            <X size={14} className="text-muted" style={{ marginLeft: '8px', cursor: 'pointer' }} onClick={handleCloseTab} />
                         </div>
                     </div>
 
@@ -212,6 +280,24 @@ const Workspace = () => {
 
                         {/* Floating Action Buttons */}
                         <div style={{ position: 'absolute', bottom: '32px', right: '32px', display: 'flex', gap: '16px', zIndex: 10 }}>
+                            <button
+                                onClick={handleSave}
+                                style={{
+                                    background: 'var(--surface-light)',
+                                    color: 'var(--text-primary)',
+                                    padding: '10px 20px',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                                    border: '1px solid var(--border-color)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <Save size={16} /> Save
+                            </button>
                             <button
                                 onClick={handleRun}
                                 disabled={isRunning}
@@ -267,10 +353,8 @@ const Workspace = () => {
                         </div>
 
                         <div style={{ flex: 1, padding: '24px', overflowY: 'auto', fontFamily: '"Fira Code", monospace', fontSize: '13px' }}>
-                            {logs.map((log, i) => (
-                                <div key={i} style={{ marginBottom: '6px', color: log.color }}>
-                                    {log.text}
-                                </div>
+                            {logs.map((log) => (
+                                <TypewriterLog key={log.id} text={log.text} color={log.color} />
                             ))}
                             <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
                                 <span className="cursor-blink" style={{ width: '8px', height: '18px', background: 'var(--text-secondary)' }}></span>
@@ -282,6 +366,19 @@ const Workspace = () => {
 
             </div>
         </div>
+    );
+};
+
+// Component for typing effect
+const TypewriterLog = ({ text, color }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ marginBottom: '6px', color: color }}
+        >
+            {text}
+        </motion.div>
     );
 };
 

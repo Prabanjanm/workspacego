@@ -1,17 +1,43 @@
 import React, { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Cloud, Terminal, Clock, Settings, Bell, Search, Menu, LogOut, ChevronDown, Cpu, Activity, Folder } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Shield, Cloud, Terminal, Clock, Settings, Bell, Search, Menu, LogOut, ChevronDown, Cpu, Activity, Folder, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const [accessing, setAccessing] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
 
     const handleAccess = () => {
         setAccessing(true);
         setTimeout(() => {
             navigate('/workspace');
         }, 1200);
+    };
+
+    const handleComingSoon = (feature) => {
+        toast(feature + " feature coming soon!", {
+            icon: '🚧',
+            style: {
+                borderRadius: '10px',
+                background: 'var(--surface-dark)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-color)',
+            },
+        });
+    };
+
+    const handleFileClick = (filename) => {
+        toast.success(`Synced ${filename}`, {
+            style: {
+                borderRadius: '10px',
+                background: 'var(--surface-dark)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-color)',
+            }
+        });
     };
 
     const StatusBadge = ({ status }) => {
@@ -36,6 +62,7 @@ const Dashboard = () => {
 
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-dark)' }}>
+            <Toaster position="bottom-center" />
             {/* Glass Navbar */}
             <motion.nav
                 initial={{ y: -20, opacity: 0 }}
@@ -50,27 +77,34 @@ const Dashboard = () => {
                 }}
             >
                 <div className="container" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="hide-on-desktop" onClick={() => setMobileMenuOpen(true)}>
+                            <Menu size={24} color="var(--text-primary)" />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => navigate('/')}>
                             <Cpu size={28} className="text-gradient" />
                             <h2 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px' }} className="text-gradient">
                                 WorkspaceGo
                             </h2>
                         </div>
-                        <div style={{ display: 'none', md: { display: 'flex' }, gap: '32px', fontSize: '14px', fontWeight: 500 }}>
+                        <div className="hide-on-mobile" style={{ display: 'flex', gap: '32px', fontSize: '14px', fontWeight: 500, marginLeft: '32px' }}>
                             <span style={{ color: 'var(--text-primary)', borderBottom: '2px solid var(--primary-color)', paddingBottom: '21px', cursor: 'pointer' }}>Dashboard</span>
-                            <span style={{ color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.8 }}>Environments</span>
-                            <span style={{ color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.8 }}>Activity</span>
+                            <span onClick={() => navigate('/environments')} style={{ color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.8, transition: 'color 0.2s' }} className="hover:text-primary">Environments</span>
+                            <span onClick={() => navigate('/activity')} style={{ color: 'var(--text-secondary)', cursor: 'pointer', opacity: 0.8, transition: 'color 0.2s' }} className="hover:text-primary">Activity</span>
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                        <div style={{ position: 'relative', cursor: 'pointer' }}>
+                        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setNotificationsOpen(!notificationsOpen)}>
                             <Bell size={20} color="var(--text-secondary)" />
                             <span style={{ position: 'absolute', top: -2, right: 0, width: '8px', height: '8px', background: 'var(--danger-color)', borderRadius: '50%', border: '2px solid var(--bg-dark)' }}></span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '6px 12px', background: 'var(--surface-light)', borderRadius: '30px', border: '1px solid var(--border-color)' }}>
+                        <div
+                            className="hide-on-mobile"
+                            onClick={() => navigate('/profile')}
+                            style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '6px 12px', background: 'var(--surface-light)', borderRadius: '30px', border: '1px solid var(--border-color)' }}
+                        >
                             <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 600, fontSize: '12px' }}>
                                 S
                             </div>
@@ -79,6 +113,111 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
+
+                <AnimatePresence>
+                    {mobileMenuOpen && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setMobileMenuOpen(false)}
+                                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 60, backdropFilter: 'blur(4px)' }}
+                            />
+                            <motion.div
+                                initial={{ x: '-100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '-100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                style={{
+                                    position: 'fixed',
+                                    top: 0,
+                                    left: 0,
+                                    bottom: 0,
+                                    width: '280px',
+                                    background: 'var(--bg-darker)',
+                                    zIndex: 70,
+                                    padding: '24px',
+                                    borderRight: '1px solid var(--border-color)',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <Cpu size={24} className="text-gradient" />
+                                        <span style={{ fontWeight: 700, fontSize: '20px' }}>Menu</span>
+                                    </div>
+                                    <div onClick={() => setMobileMenuOpen(false)}>
+                                        <X size={24} color="var(--text-secondary)" />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', fontSize: '16px', fontWeight: 500 }}>
+                                    <div style={{ color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <Activity size={20} /> Dashboard
+                                    </div>
+                                    <div onClick={() => navigate('/environments')} style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <Terminal size={20} /> Environments
+                                    </div>
+                                    <div onClick={() => navigate('/activity')} style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <Clock size={20} /> Activity
+                                    </div>
+                                    <div onClick={() => navigate('/profile')} style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <Settings size={20} /> Settings
+                                    </div>
+                                </div>
+
+                                <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
+                                    <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--danger-color)', cursor: 'pointer' }}>
+                                        <LogOut size={20} /> Sign Out
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+
+                    {notificationsOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            style={{
+                                position: 'absolute',
+                                top: '64px',
+                                right: '80px',
+                                width: '320px',
+                                background: 'var(--surface-dark)',
+                                borderRadius: '16px',
+                                border: '1px solid var(--border-color)',
+                                boxShadow: 'var(--shadow-lg)',
+                                padding: '16px',
+                                zIndex: 60
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                <h4 style={{ fontSize: '14px' }}>Notifications</h4>
+                                <span style={{ fontSize: '12px', color: 'var(--primary-color)', cursor: 'pointer' }}>Mark all read</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'start' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary-color)', marginTop: '6px' }}></div>
+                                    <div>
+                                        <p style={{ fontSize: '13px', color: 'var(--text-primary)' }}>New model training completed</p>
+                                        <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>2 mins ago</p>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '12px', alignItems: 'start' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--warning-color)', marginTop: '6px' }}></div>
+                                    <div>
+                                        <p style={{ fontSize: '13px', color: 'var(--text-primary)' }}>High CPU usage alert</p>
+                                        <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>1 hour ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </motion.nav>
 
             {/* Dashboard Content */}
@@ -94,7 +233,7 @@ const Dashboard = () => {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>Manage your high-performance containerized environments.</p>
                 </motion.div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '32px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
 
                     {/* Environment Card */}
                     <motion.div
@@ -159,7 +298,8 @@ const Dashboard = () => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
                             className="glass-card card-hover"
-                            style={{ padding: '24px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                            onClick={() => handleComingSoon('Security Detail')}
+                            style={{ padding: '24px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
                         >
                             <div>
                                 <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Security Audit</h4>
@@ -195,6 +335,7 @@ const Dashboard = () => {
                                     <motion.div
                                         whileHover={{ x: 4, backgroundColor: 'rgba(255,255,255,0.03)' }}
                                         key={file.name}
+                                        onClick={() => handleFileClick(file.name)}
                                         style={{
                                             display: 'flex',
                                             alignItems: 'center',
