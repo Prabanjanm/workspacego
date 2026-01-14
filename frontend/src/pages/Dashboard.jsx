@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Cloud, Terminal, Clock, Settings, Bell, Search, Menu, LogOut, ChevronDown, Cpu, Activity, Folder, X } from 'lucide-react';
+import { Shield, Cloud, Terminal, Clock, Settings, Bell, Search, Menu, LogOut, ChevronDown, Cpu, Activity, Folder, X, Laptop } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
@@ -82,7 +82,12 @@ const Dashboard = () => {
                             <Menu size={24} color="var(--text-primary)" />
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => navigate('/')}>
-                            <Cpu size={28} className="text-gradient" />
+                            <div style={{ position: 'relative', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Laptop size={28} className="text-gradient" strokeWidth={1.5} />
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', marginTop: '-1px' }}>
+                                    <Cloud size={10} className="text-gradient" fill="currentColor" style={{ opacity: 0.8 }} />
+                                </div>
+                            </div>
                             <h2 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px' }} className="text-gradient">
                                 WorkspaceGo
                             </h2>
@@ -145,7 +150,12 @@ const Dashboard = () => {
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <Cpu size={24} className="text-gradient" />
+                                        <div style={{ position: 'relative', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Laptop size={24} className="text-gradient" strokeWidth={1.5} />
+                                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', marginTop: '-1px' }}>
+                                                <Cloud size={9} className="text-gradient" fill="currentColor" style={{ opacity: 0.8 }} />
+                                            </div>
+                                        </div>
                                         <span style={{ fontWeight: 700, fontSize: '20px' }}>Menu</span>
                                     </div>
                                     <div onClick={() => setMobileMenuOpen(false)}>
@@ -233,6 +243,54 @@ const Dashboard = () => {
                     <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>Manage your high-performance containerized environments.</p>
                 </motion.div>
 
+                {/* Live System Stats */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="glass-card"
+                    style={{ marginBottom: '32px', padding: '24px', display: 'flex', gap: '32px', flexWrap: 'wrap' }}
+                >
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Global CPU Usage</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>42%</span>
+                        </div>
+                        <div style={{ height: '6px', background: 'var(--surface-light)', borderRadius: '3px', overflow: 'hidden' }}>
+                            <motion.div
+                                animate={{ width: ['40%', '45%', '42%'] }}
+                                transition={{ repeat: Infinity, duration: 3 }}
+                                style={{ height: '100%', background: 'var(--primary-color)', borderRadius: '3px' }}
+                            />
+                        </div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>GPU Cluster Load</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>78%</span>
+                        </div>
+                        <div style={{ height: '6px', background: 'var(--surface-light)', borderRadius: '3px', overflow: 'hidden' }}>
+                            <motion.div
+                                animate={{ width: ['75%', '82%', '78%'] }}
+                                transition={{ repeat: Infinity, duration: 2.5 }}
+                                style={{ height: '100%', background: 'var(--accent-color)', borderRadius: '3px' }}
+                            />
+                        </div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Memory</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>12.4 GB / 32 GB</span>
+                        </div>
+                        <div style={{ height: '6px', background: 'var(--surface-light)', borderRadius: '3px', overflow: 'hidden' }}>
+                            <motion.div
+                                animate={{ width: ['38%', '39%', '38%'] }}
+                                transition={{ repeat: Infinity, duration: 5 }}
+                                style={{ height: '100%', background: 'var(--success-color)', borderRadius: '3px' }}
+                            />
+                        </div>
+                    </div>
+                </motion.div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
 
                     {/* Environment Card */}
@@ -252,6 +310,29 @@ const Dashboard = () => {
                             </div>
                             <h3 style={{ fontSize: '22px', marginBottom: '8px' }}>Python ML Suite</h3>
                             <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>PyTorch, TensorFlow, CUDA 11.8 • NVIDIA T4</p>
+
+                            {/* Live Resource Graph Simulation */}
+                            <div style={{ marginTop: '24px', display: 'flex', alignItems: 'flex-end', gap: '4px', height: '40px', paddingRight: '20px' }}>
+                                {[40, 65, 55, 80, 45, 70, 90, 60, 75, 50, 65, 85].map((h, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ height: '20%' }}
+                                        animate={{ height: `${h}%` }}
+                                        transition={{
+                                            repeat: Infinity,
+                                            repeatType: "reverse",
+                                            duration: 1.5,
+                                            delay: i * 0.1
+                                        }}
+                                        style={{
+                                            flex: 1,
+                                            background: 'var(--primary-color)',
+                                            opacity: 0.3,
+                                            borderRadius: '2px'
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
 
                         <div style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileCode, FileJson, FileText, Lock, LogOut, Terminal, Play, Save, ChevronRight, X, Menu, Folder } from 'lucide-react';
+import { FileCode, FileJson, FileText, Lock, LogOut, Terminal, Play, Save, ChevronRight, X, Menu, Folder, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -50,10 +50,17 @@ const mockFiles = [
 const Workspace = () => {
     const navigate = useNavigate();
     const [activeFile, setActiveFile] = useState(mockFiles[0]);
+    const [openFiles, setOpenFiles] = useState([mockFiles[0]]);
     const [terminalOpen, setTerminalOpen] = useState(true);
     const [isRunning, setIsRunning] = useState(false);
     const [logs, setLogs] = useState([]);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [aiPanelOpen, setAiPanelOpen] = useState(false);
+    const [aiContent, setAiContent] = useState('');
+    const [isAiTyping, setIsAiTyping] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(2 * 60 * 60); // 2 hours default
+
+
 
     useEffect(() => {
         toast.success("Secure Workspace Environment Loaded");
@@ -63,9 +70,72 @@ const Workspace = () => {
             { text: "user@workspace-go:~$ awaiting input...", color: "var(--text-secondary)" }
         ]);
 
+
+
         // Auto-close sidebar on mobile initial load
         if (window.innerWidth < 768) setSidebarOpen(false);
+
+        const timer = setInterval(() => {
+            setTimeLeft(prev => Math.max(0, prev - 1));
+        }, 1000);
+
+        return () => clearInterval(timer);
     }, []);
+
+    const handleOpenFile = (file) => {
+        if (!openFiles.find(f => f.name === file.name)) {
+            setOpenFiles([...openFiles, file]);
+        }
+        setActiveFile(file);
+        if (window.innerWidth < 768) setSidebarOpen(false);
+    };
+
+    const handleCloseTab = (e, fileName) => {
+        e.stopPropagation();
+        const newFiles = openFiles.filter(f => f.name !== fileName);
+        if (newFiles.length === 0) {
+            toast.error("Cannot close main entry point", {
+                style: {
+                    background: 'var(--surface-dark)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)'
+                }
+            });
+            return;
+        }
+        if (activeFile.name === fileName) {
+            setActiveFile(newFiles[newFiles.length - 1]);
+        }
+        setOpenFiles(newFiles);
+    };
+
+    const runAiAnalysis = () => {
+        setAiPanelOpen(true);
+        if (aiContent) return; // Don't run twice
+
+        setIsAiTyping(true);
+        const suggestion = `
+I've analyzed your secure model implementation.
+
+OPTIMIZATION SUGGESTIONS:
+1. Add BatchNormalization layers to improve convergence speed (~15% faster).
+2. The current dropout rate of 0.0 is risky. Suggest adding Dropout(0.5) layer after the dense layer to prevent overfitting.
+3. Your secure enclave connection protocol looks solid, but consider rotating the AES keys every 60 minutes.
+
+Here is a refactored snippet for the model:
+... model.add(layers.BatchNormalization()) ...
+        `;
+
+        let i = 0;
+        const typeInterval = setInterval(() => {
+            setAiContent(suggestion.substring(0, i));
+            i++;
+            if (i > suggestion.length) {
+                clearInterval(typeInterval);
+                setIsAiTyping(false);
+            }
+        }, 30);
+    };
 
     const addLog = (text, color) => {
         setLogs(prev => [...prev, { text, color, id: Date.now() }]);
@@ -101,6 +171,13 @@ const Workspace = () => {
         }, 1500);
     };
 
+    // Auto-end session when timer hits 0
+    useEffect(() => {
+        if (timeLeft === 0) {
+            handleEndSession();
+        }
+    }, [timeLeft]);
+
     const getIcon = (name) => {
         if (name.endsWith('.py')) return <FileCode size={15} color="var(--primary-color)" />;
         if (name.endsWith('.js')) return <FileCode size={15} color="#fcd34d" />;
@@ -118,16 +195,7 @@ const Workspace = () => {
         });
     };
 
-    const handleCloseTab = (e) => {
-        e.stopPropagation();
-        toast.error("Cannot close main entry point", {
-            style: {
-                background: 'var(--surface-dark)',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border-color)'
-            }
-        });
-    };
+
 
     return (
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-darker)', color: 'var(--text-primary)', fontFamily: 'Menlo, Monaco, "Courier New", monospace', overflow: 'hidden' }}>
@@ -167,6 +235,19 @@ const Workspace = () => {
                     <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>workspace-go / {activeFile.name}</span>
                 </div>
 
+                <div style={{ marginRight: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', background: 'var(--surface-dark)', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                    <Clock size={14} />
+                    <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>
+                        {Math.floor(timeLeft / 3600).toString().padStart(2, '0')}:
+                        {Math.floor((timeLeft % 3600) / 60).toString().padStart(2, '0')}:
+                        {(timeLeft % 60).toString().padStart(2, '0')}
+                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginLeft: '4px' }}>
+                        <div onClick={() => setTimeLeft(prev => prev + 1800)} style={{ cursor: 'pointer', lineHeight: 0.5 }}>▲</div>
+                        <div onClick={() => setTimeLeft(prev => Math.max(0, prev - 1800))} style={{ cursor: 'pointer', lineHeight: 0.5 }}>▼</div>
+                    </div>
+                </div>
+
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -204,10 +285,7 @@ const Workspace = () => {
                                 {mockFiles.map(file => (
                                     <div
                                         key={file.name}
-                                        onClick={() => {
-                                            setActiveFile(file);
-                                            if (window.innerWidth < 768) setSidebarOpen(false);
-                                        }}
+                                        onClick={() => handleOpenFile(file)}
                                         style={{
                                             padding: '8px 24px',
                                             cursor: 'pointer',
@@ -242,21 +320,34 @@ const Workspace = () => {
 
                     {/* File Tabs */}
                     <div style={{ display: 'flex', background: 'var(--bg-dark)', borderBottom: '1px solid var(--border-color)', overflowX: 'auto' }}>
-                        <div style={{
-                            padding: '12px 24px',
-                            background: 'var(--bg-darker)',
-                            color: 'var(--text-primary)',
-                            fontSize: '13px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            borderTop: '2px solid var(--primary-color)',
-                            borderRight: '1px solid var(--border-color)',
-                            whiteSpace: 'nowrap'
-                        }}>
-                            {getIcon(activeFile.name)} {activeFile.name}
-                            <X size={14} className="text-muted" style={{ marginLeft: '8px', cursor: 'pointer' }} onClick={handleCloseTab} />
-                        </div>
+                        {openFiles.map(file => (
+                            <div
+                                key={file.name}
+                                onClick={() => setActiveFile(file)}
+                                style={{
+                                    padding: '10px 20px',
+                                    background: activeFile.name === file.name ? 'var(--bg-darker)' : 'rgba(0,0,0,0.2)',
+                                    color: activeFile.name === file.name ? 'var(--text-primary)' : 'var(--text-muted)',
+                                    fontSize: '13px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    borderTop: activeFile.name === file.name ? '2px solid var(--primary-color)' : '2px solid transparent',
+                                    borderRight: '1px solid var(--border-color)',
+                                    cursor: 'pointer',
+                                    flexShrink: 0
+                                }}
+                            >
+                                {getIcon(file.name)} {file.name}
+                                <div
+                                    onClick={(e) => handleCloseTab(e, file.name)}
+                                    className="hover-bg"
+                                    style={{ borderRadius: '4px', padding: '2px', display: 'flex' }}
+                                >
+                                    <X size={12} />
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
                     <div style={{ flex: 1, position: 'relative' }}>
@@ -274,12 +365,77 @@ const Workspace = () => {
                                 fontSize: '15px',
                                 lineHeight: '1.6',
                                 resize: 'none',
-                                outline: 'none'
+                                outline: 'none',
+                                position: 'relative',
+                                zIndex: 1
                             }}
                         />
 
+
+
+                        {/* AI Copilot Panel */}
+                        <AnimatePresence>
+                            {aiPanelOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 50 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 50 }}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '20px',
+                                        top: '20px',
+                                        width: '300px',
+                                        background: 'rgba(30, 30, 40, 0.95)',
+                                        backdropFilter: 'blur(10px)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '12px',
+                                        padding: '16px',
+                                        boxShadow: 'var(--shadow-lg)',
+                                        zIndex: 20
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-color)', fontWeight: 600 }}>
+                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--accent-color)', boxShadow: '0 0 8px var(--accent-color)' }}></div>
+                                            AI Copilot
+                                        </div>
+                                        <X size={16} className="cursor-pointer" onClick={() => setAiPanelOpen(false)} />
+                                    </div>
+                                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', whiteSpace: 'pre-wrap', maxHeight: '300px', overflowY: 'auto' }}>
+                                        {aiContent}
+                                        {isAiTyping && <span className="cursor-blink">|</span>}
+                                    </div>
+                                    {!isAiTyping && aiContent && (
+                                        <button className="btn-primary" style={{ width: '100%', marginTop: '16px', fontSize: '12px', padding: '8px' }}>
+                                            Apply Fixes
+                                        </button>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
                         {/* Floating Action Buttons */}
                         <div style={{ position: 'absolute', bottom: '32px', right: '32px', display: 'flex', gap: '16px', zIndex: 10 }}>
+                            <button
+                                onClick={runAiAnalysis}
+                                className="magic-button"
+                                style={{
+                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                    color: 'white',
+                                    padding: '10px 20px',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
+                                    border: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.1 12.1"></path><path d="M12 12 18.4 5.6"></path></svg>
+                                Ask AI
+                            </button>
                             <button
                                 onClick={handleSave}
                                 style={{

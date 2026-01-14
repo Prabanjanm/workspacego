@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, ArrowRight, ShieldCheck, Cpu } from 'lucide-react';
+import { Lock, ArrowRight, ShieldCheck, Laptop, Cloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
@@ -8,15 +8,11 @@ const Login = ({ onLogin }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    setLoading(true);
-    // Simulate network delay
-    setTimeout(() => {
-      setLoading(false);
-      onLogin();
-      toast.success("Successfully logged in!");
-      navigate('/dashboard');
-    }, 1500);
+  const handleLogin = async () => {
+    // Direct login for now to restore access
+    onLogin();
+    toast.success("Welcome back!");
+    navigate('/dashboard');
   };
 
   return (
@@ -48,7 +44,12 @@ const Login = ({ onLogin }) => {
         >
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', borderRadius: '20px', opacity: 0.2, transform: 'rotate(45deg)' }}></div>
           <div style={{ position: 'absolute', inset: 0, border: '2px solid rgba(255,255,255,0.1)', borderRadius: '20px', transform: 'rotate(45deg)' }}></div>
-          <Cpu size={40} className="text-gradient" />
+          <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Laptop size={44} className="text-gradient" strokeWidth={1.5} />
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -55%)' }}>
+              <Cloud size={16} className="text-gradient" fill="currentColor" style={{ opacity: 0.9 }} />
+            </div>
+          </div>
         </motion.div>
 
         <h1 className="text-gradient" style={{ fontSize: '36px', marginBottom: '12px', letterSpacing: '-1px' }}>
@@ -58,27 +59,48 @@ const Login = ({ onLogin }) => {
           Secure, isolated development environments <br />for the modern student.
         </p>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="btn-primary"
-          onClick={handleLogin}
-          disabled={loading}
-          style={{ width: '100%', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '32px' }}
-        >
-          {loading ? (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-              style={{ width: '20px', height: '20px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }}
-            />
-          ) : (
-            <>
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '22px', height: '22px', background: 'white', borderRadius: '50%', padding: '2px' }} />
-              <span>Continue with Google</span>
-            </>
-          )}
-        </motion.button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-primary"
+            onClick={handleLogin}
+            disabled={loading}
+            style={{ width: '100%', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px' }}
+          >
+            {loading ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+                style={{ width: '20px', height: '20px', border: '2px solid white', borderTopColor: 'transparent', borderRadius: '50%' }}
+              />
+            ) : (
+              <>
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style={{ width: '22px', height: '22px', background: 'white', borderRadius: '50%', padding: '2px' }} />
+                <span>Continue with Google</span>
+              </>
+            )}
+          </motion.button>
+
+          <button
+            onClick={() => {
+              onLogin();
+              toast.success("Guest Access Granted");
+              navigate('/dashboard');
+            }}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              padding: '12px',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Continue as Guest (No Setup)
+          </button>
+        </div>
 
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>
           <div
